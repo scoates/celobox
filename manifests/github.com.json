@@ -1,0 +1,43 @@
+{
+    "hosts": ["github.com"],
+    "login": {
+        "urls": {
+            "form": "https://github.com/login",
+            "post": "https://github.com/session"
+        },
+        "form": {
+            "username": "login",
+            "password": "password",
+            "csrf": "authenticity_token",
+            "literal": {
+                "commit": "Sign in"
+            }
+        },
+        "success": {
+            "test": "header-present",
+            "name": "x-github-user"
+        }
+    },
+    "password": {
+        "urls": {
+            "form": "https://github.com/settings/admin",
+            "post": "https://github.com/account"
+        },
+        "form": {
+            "old_password": "user[old_password]",
+            "new_password": ["user[password]", "user[password_confirmation]"],
+            "csrf": "authenticity_token",
+            "literal": {
+                "_method": "put"
+            }
+        },
+        "success": {
+            "test": "landing",
+            "name": "https://github.com/"
+        }
+    },
+    "csrf_token": {
+        "selector": "meta[name=\"csrf-token\"]",
+        "attribute": "content"
+    }
+}
