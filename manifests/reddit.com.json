@@ -1,0 +1,47 @@
+{
+    "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36",
+    "verify_ssl": false,
+    "hosts": ["reddit.com"],
+    "login": {
+        "urls": {
+            "form": "https://ssl.reddit.com/login",
+            "post": "https://ssl.reddit.com/post/login"
+        },
+        "form": {
+            "username": "user",
+            "password": "passwd",
+            "literal": {
+                "op": "login",
+                "dest": "https://ssl.reddit.com/"
+            }
+        },
+        "success": {
+            "test": "header-present",
+            "name": "x-github-user"
+        }
+    },
+    "password": {
+        "urls": {
+            "form": "https://ssl.reddit.com/prefs/update/",
+            "post": "https://ssl.reddit.com/post/update"
+        },
+        "form": {
+            "old_password": "curpass",
+            "new_password": ["newpass", "verpass"],
+            "csrf": "uh",
+            "literal": {
+                "top": "off",
+                "dest": "/prefs/update/"
+            }
+        },
+        "success": {
+            "test": "page",
+            "name": "https://ssl.reddit.com/prefs/update/"
+        }
+    },
+    "csrf_token": {
+        "selector": "input[name=\"uh\"]",
+        "attribute": "value"
+    }
+}
+
