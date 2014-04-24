@@ -49,7 +49,7 @@ class Passwd:
         payload = dict({
             self.data['login']['form']['username']: username,
             self.data['login']['form']['password']: password,
-        }.items() + self.data['login']['form']['literal'].items())
+        }.items() + self.data['login']['form'].get('literal', {}).items())
         if 'csrf' in self.data['login']['form']:
             csrf = self.get_csrf(form_page)
             payload = dict(payload.items() + {
