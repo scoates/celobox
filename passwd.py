@@ -24,7 +24,10 @@ class Passwd:
         self.session.headers.update(self.data.get('headers', {}))
 
     def load_data(self, domain):
-        return json.load(open('manifests/%s.json' % domain))
+        try:
+            return json.load(open('manifests/%s.json' % domain))
+        except IOError:
+            sys.exit('No manifest found for %s' % domain)
 
     def get_csrf(self, page_data):
         bs = BeautifulSoup(page_data)
