@@ -108,8 +108,7 @@ if __name__ == "__main__":
     try:
         domain = sys.argv[1]
     except IndexError:
-        print "Usage: %s domain_name" % sys.argv[0]
-        sys.exit(255)
+        sys.exit("Usage: %s domain_name" % sys.argv[0])
 
     passwd = Passwd(domain, debug=('DEBUG' in os.environ))
 
@@ -126,8 +125,7 @@ if __name__ == "__main__":
         old_pass = getpass.getpass('Old password: ')
 
     if not passwd.sign_in(username, old_pass):
-        print "Sign in failed."
-        sys.exit(1)
+        sys.exit("Sign in failed.")
 
     while True:
         new_pass = getpass.getpass('New password: ')
