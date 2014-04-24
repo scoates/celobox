@@ -21,6 +21,7 @@ class Passwd:
         self.logger = logging.getLogger(self.__class__.__name__)
         self.logger.debug('Logging enabled')
         self.session = requests.Session()
+        self.session.headers.update(self.data.get('headers', {}))
 
     def load_data(self, domain):
         return json.load(open('manifests/%s.json' % domain))
