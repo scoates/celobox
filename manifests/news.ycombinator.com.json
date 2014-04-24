@@ -12,7 +12,7 @@
         },
         "success": {
             "test": "landing",
-            "name": "https://news.ycombinator.com"
+            "name": "https://news.ycombinator.com/"
         }
     },
     "password": {
