@@ -103,6 +103,57 @@ class Passwd:
         return success
 
 
+def interactive(domain, field):
+    """
+        Gets username, old password, and new password info from the user
+        via the TTY
+    """
+    if field == 'username':
+        if 'USERNAME' in os.environ:
+            sys.stderr.write("Using provided username\n")
+            return os.environ['USERNAME']
+        else:
+            return raw_input('Username: ')
+    elif field == 'old_password':
+        if 'OLD_PASS' in os.environ:
+            sys.stderr.write("Using provided password\n")
+            return os.environ['OLD_PASS']
+        else:
+            return getpass.getpass('Old password: ')
+    elif field == 'new_pass':
+        return getpass.getpass('New password: ')
+    elif field == 'new_pass2':
+        return getpass.getpass('New password (again): ')
+
+
+def change_password(domain, reader=interactive):
+    """
+        Change the password for `domain`.  `reader` is a function that
+        takes 2 arguments: the domain and the field to read.  It should
+        return a unicode with the value for that field for that domain.
+    """
+    passwd = Passwd(domain, debug=('DEBUG' in os.environ))
+
+    username = reader(domain, 'username')
+    old_pass = reader(domain, 'old_password')
+
+    if not passwd.sign_in(username, old_pass):
+        sys.exit("Sign in failed.")
+
+    while True:
+        new_pass = reader(domain, 'new_pass')
+        new_pass2 = reader(domain, 'new_pass2')
+        if new_pass == new_pass2:
+            break
+        else:
+            sys.stderr.write("Passwords do not match.\n")
+
+    if passwd.change_password(new_pass):
+        sys.stderr.write("Password changed!\n")
+    else:
+        sys.stderr.write("Password change failed.\n")
+
+
 if __name__ == "__main__":
 
     try:
@@ -110,32 +161,5 @@ if __name__ == "__main__":
     except IndexError:
         sys.exit("Usage: %s domain_name" % sys.argv[0])
 
-    passwd = Passwd(domain, debug=('DEBUG' in os.environ))
+    change_password(domain)
 
-    if 'USERNAME' in os.environ:
-        username = os.environ['USERNAME']
-        print "Using provided username"
-    else:
-        username = raw_input('Username: ')
-
-    if 'OLD_PASS' in os.environ:
-        old_pass = os.environ['OLD_PASS']
-        print "Using provided password"
-    else:
-        old_pass = getpass.getpass('Old password: ')
-
-    if not passwd.sign_in(username, old_pass):
-        sys.exit("Sign in failed.")
-
-    while True:
-        new_pass = getpass.getpass('New password: ')
-        new_pass2 = getpass.getpass('New password (again): ')
-        if new_pass == new_pass2:
-            break
-        else:
-            print "Passwords do not match."
-
-    if passwd.change_password(new_pass):
-        print "Password changed!"
-    else:
-        print "Password change failed."
