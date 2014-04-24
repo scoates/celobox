@@ -48,8 +48,11 @@ class Passwd:
 
     def sign_in(self, username, password):
         self.logger.debug('Signing in: %s' % username)
+
+        verify_ssl = self.data.get('verify_ssl', True)
+
         form_page = self.session.get(
-            self.data['login']['urls']['form']).content
+            self.data['login']['urls']['form'], verify=verify_ssl).content
 
         payload = dict({
             self.data['login']['form']['username']: username,
@@ -61,7 +64,7 @@ class Passwd:
                 self.data['login']['form']['csrf']: csrf}.items())
 
         post = self.session.post(
-            self.data['login']['urls']['post'], data=payload)
+            self.data['login']['urls']['post'], data=payload, verify=verify_ssl)
         success = self.test_success(post, self.data['login'])
         if success:
             self.username = username
