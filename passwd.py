@@ -40,6 +40,10 @@ class Passwd:
         if 'landing' == container['success']['test']:
             return container['success']['name'] == post.request.url
 
+        if 'page' == container['success']['test']:
+            r = self.session.get(container['success']['name'])
+            return r.status_code == requests.codes.ok
+
         raise ValueError("Unknown login verification test")
 
     def sign_in(self, username, password):
