@@ -1,0 +1,37 @@
+{
+    "hosts": ["news.ycombinator.com"],
+    "login": {
+        "urls": {
+            "form": "https://news.ycombinator.com/newslogin",
+            "post": "https://news.ycombinator.com/y"
+        },
+        "form": {
+            "username": "u",
+            "password": "p",
+            "csrf": "fnid"
+        },
+        "success": {
+            "test": "landing",
+            "name": "https://news.ycombinator.com"
+        }
+    },
+    "password": {
+        "urls": {
+            "form": "https://news.ycombinator.com/changepw",
+            "post": "https://news.ycombinator.com/x"
+        },
+        "form": {
+            "old_password": "op",
+            "new_password": ["p1"],
+            "csrf": "fnid"
+        },
+        "success": {
+            "test": "landing",
+            "name": "https://news.ycombinator.com/x"
+        }
+    },
+    "csrf_token": {
+        "selector": "input[name=\"fnid\"]",
+        "attribute": "value"
+    }
+}
