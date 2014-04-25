@@ -8,7 +8,7 @@ import requests
 from bs4 import BeautifulSoup
 
 
-class Passwd:
+class Passwd(object):
     def __init__(self, domain, loader, debug=False):
         self.domain = domain
         self.data = loader(domain)
