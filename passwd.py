@@ -118,6 +118,8 @@ def interactive_reader(domain, field):
         return getpass.getpass('New password: ')
     elif field == 'new_pass2':
         return getpass.getpass('New password (again): ')
+    else:
+        return raw_input('%s: ' % field)
 
 
 def json_loader(domain):
