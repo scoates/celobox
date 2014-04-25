@@ -9,9 +9,9 @@ from bs4 import BeautifulSoup
 
 
 class Passwd:
-    def __init__(self, domain, debug=False):
+    def __init__(self, domain, loader, debug=False):
         self.domain = domain
-        self.data = self.load_data(domain)
+        self.data = loader(domain)
         self.csrf_token = None
         if debug:
             loglevel = logging.DEBUG
@@ -22,12 +22,6 @@ class Passwd:
         self.logger.debug('Logging enabled')
         self.session = requests.Session()
         self.session.headers.update(self.data.get('headers', {}))
-
-    def load_data(self, domain):
-        try:
-            return json.load(open('manifests/%s.json' % domain))
-        except IOError:
-            sys.exit('No manifest found for %s' % domain)
 
     def get_csrf(self, page_data):
         bs = BeautifulSoup(page_data)
@@ -103,7 +97,7 @@ class Passwd:
         return success
 
 
-def interactive(domain, field):
+def interactive_reader(domain, field):
     """
         Gets username, old password, and new password info from the user
         via the TTY
@@ -126,13 +120,20 @@ def interactive(domain, field):
         return getpass.getpass('New password (again): ')
 
 
-def change_password(domain, reader=interactive):
+def json_loader(domain):
+    try:
+        return json.load(open('manifests/%s.json' % domain))
+    except IOError:
+        sys.exit('No manifest found for %s' % domain)
+
+
+def change_password(domain, reader=interactive_reader):
     """
         Change the password for `domain`.  `reader` is a function that
         takes 2 arguments: the domain and the field to read.  It should
         return a unicode with the value for that field for that domain.
     """
-    passwd = Passwd(domain, debug=('DEBUG' in os.environ))
+    passwd = Passwd(domain, loader=json_loader, debug=('DEBUG' in os.environ))
 
     username = reader(domain, 'username')
     old_pass = reader(domain, 'old_password')
