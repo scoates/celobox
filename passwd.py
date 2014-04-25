@@ -121,6 +121,9 @@ def interactive_reader(domain, field):
 
 
 def json_loader(domain):
+    """
+        Load the login/change password data for the specified domain
+    """
     try:
         return json.load(open('manifests/%s.json' % domain))
     except IOError:
