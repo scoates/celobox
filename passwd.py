@@ -7,6 +7,10 @@ import requests
 from bs4 import BeautifulSoup
 
 
+class PasswdDomainException(Exception):
+    pass
+
+
 class Passwd:
     def __init__(self, domain, debug=False):
         self.domain = domain
@@ -26,7 +30,10 @@ class Passwd:
         self.session.headers.update(self.data.get('headers', {}))
 
     def load_data(self, domain):
-        return json.load(open('manifests/%s.json' % domain))
+        try:
+            return json.load(open('manifests/%s.json' % domain))
+        except (IOError):
+            raise PasswdDomainException
 
     def get_csrf(self, page_data):
         bs = BeautifulSoup(page_data)
@@ -119,7 +126,12 @@ if __name__ == "__main__":
     parser.add_argument("--newpass", help="New Password (avoids prompt)")
     args = parser.parse_args()
 
-    passwd = Passwd(args.domain, debug=args.debug)
+    try:
+        passwd = Passwd(args.domain, debug=args.debug)
+    except (PasswdDomainException):
+        print "Invalid domain"
+        sys.exit(255)
+
     if args.username:
         username = args.username
         print "Using provided username"
