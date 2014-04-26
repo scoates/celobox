@@ -102,22 +102,26 @@ class Passwd:
 
 if __name__ == "__main__":
 
-    try:
-        domain = sys.argv[1]
-    except IndexError:
-        print "Usage: %s domain_name" % sys.argv[0]
-        sys.exit(255)
+    from argparse import ArgumentParser
 
-    passwd = Passwd(domain, debug=('DEBUG' in os.environ))
+    parser = ArgumentParser()
+    parser.add_argument("domain", help="domain name of app")
+    parser.add_argument(
+        "-d", "--debug", help="show debug output", action="store_true")
+    parser.add_argument("--username", help="Username (avoids prompt)")
+    parser.add_argument("--oldpass", help="Old Password (avoids prompt)")
+    parser.add_argument("--newpass", help="New Password (avoids prompt)")
+    args = parser.parse_args()
 
-    if 'USERNAME' in os.environ:
-        username = os.environ['USERNAME']
+    passwd = Passwd(args.domain, debug=args.debug)
+    if args.username:
+        username = args.username
         print "Using provided username"
     else:
         username = raw_input('Username: ')
 
-    if 'OLD_PASS' in os.environ:
-        old_pass = os.environ['OLD_PASS']
+    if args.oldpass:
+        old_pass = args.oldpass
         print "Using provided password"
     else:
         old_pass = getpass.getpass('Old password: ')
@@ -126,13 +130,16 @@ if __name__ == "__main__":
         print "Sign in failed."
         sys.exit(1)
 
-    while True:
-        new_pass = getpass.getpass('New password: ')
-        new_pass2 = getpass.getpass('New password (again): ')
-        if new_pass == new_pass2:
-            break
-        else:
-            print "Passwords do not match."
+    if args.newpass:
+        new_pass = args.newpass
+    else:
+        while True:
+            new_pass = getpass.getpass('New password: ')
+            new_pass2 = getpass.getpass('New password (again): ')
+            if new_pass == new_pass2:
+                break
+            else:
+                print "Passwords do not match."
 
     if passwd.change_password(new_pass):
         print "Password changed!"
