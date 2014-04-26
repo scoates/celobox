@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import sys
-import os
 import json
 import logging
 import getpass
@@ -20,6 +19,9 @@ class Passwd:
         logging.basicConfig(level=loglevel)
         self.logger = logging.getLogger(self.__class__.__name__)
         self.logger.debug('Logging enabled')
+        self.new_session()
+
+    def new_session(self):
         self.session = requests.Session()
         self.session.headers.update(self.data.get('headers', {}))
 
@@ -64,7 +66,9 @@ class Passwd:
                 self.data['login']['form']['csrf']: csrf}.items())
 
         post = self.session.post(
-            self.data['login']['urls']['post'], data=payload, verify=verify_ssl)
+            self.data['login']['urls']['post'],
+            data=payload,
+            verify=verify_ssl)
         success = self.test_success(post, self.data['login'])
         if success:
             self.username = username
@@ -94,9 +98,11 @@ class Passwd:
             payload = dict(payload.items() + {
                 self.data['password']['form']['csrf']: csrf}.items())
 
-        post = self.session.post(
-            self.data['password']['urls']['post'], data=payload)
-        success = self.test_success(post, self.data['password'])
+        self.session.post(self.data['password']['urls']['post'], data=payload)
+        success = self.sign_in(self.username, password)
+        if success:
+            self.new_session()
+            self.old_pass = password
         return success
 
 
