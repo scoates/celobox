@@ -109,10 +109,13 @@ class Passwd:
             payload = dict(payload.items() + {
                 self.data['password']['form']['csrf']: csrf}.items())
 
-        self.session.post(self.data['password']['urls']['post'], data=payload)
+        self.session.headers.update(
+            {'referer': self.data['password']['urls']['form']})
+
+        self.session.post(
+            self.data['password']['urls']['post'], data=payload)
         success = self.sign_in(self.username, password)
         if success:
-            self.new_session()
             self.old_pass = password
         return success
 
