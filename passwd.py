@@ -27,6 +27,7 @@ class Passwd:
 
     def new_session(self):
         self.session = requests.Session()
+        self.session.headers.update(self.data.get('headers', {}))
 
     def load_data(self, domain):
         try:
