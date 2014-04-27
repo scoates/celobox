@@ -14,8 +14,8 @@
             }
         },
         "success": {
-            "test": "header-present",
-            "name": "x-github-user"
+            "test": "landing",
+            "name": "https://github.com/"
         }
     },
     "password": {
