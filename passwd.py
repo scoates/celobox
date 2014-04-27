@@ -56,6 +56,7 @@ class Passwd:
         raise ValueError("Unknown login verification test")
 
     def sign_in(self, username, password):
+        self.new_session()
         self.logger.debug('Signing in: %s' % username)
 
         verify_ssl = self.data.get('verify_ssl', True)
