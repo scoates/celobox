@@ -35,5 +35,9 @@
     "csrf_token": {
         "selector": "meta[name=\"csrf-token\"]",
         "attribute": "content"
-    }
+    },
+    "notes": [
+        "Passwords must contain a number."
+    ]
+
 }
