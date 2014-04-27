@@ -35,10 +35,15 @@ class Passwd:
         except (IOError):
             raise PasswdDomainException
 
-    def get_csrf(self, page_data):
+    def get_csrf(self, page_data, action):
+        # use the action-specific csrf selector if possible
+        if 'csrf_token' in self.data[action]:
+            csrf_token = self.data[action]['csrf_token']
+        else:
+            csrf_token = self.data['csrf_token']
         bs = BeautifulSoup(page_data)
-        el = bs.select(self.data['csrf_token']['selector'])[0]
-        token = el[self.data['csrf_token']['attribute']]
+        el = bs.select(csrf_token['selector'])[0]
+        token = el[csrf_token['attribute']]
         self.logger.debug('Found CSRF token: %s' % token)
         return token
 
@@ -72,7 +77,7 @@ class Passwd:
             self.data['login']['form']['password']: password,
         }.items() + self.data['login']['form'].get('literal', {}).items())
         if 'csrf' in self.data['login']['form']:
-            csrf = self.get_csrf(form_page)
+            csrf = self.get_csrf(form_page, 'login')
             payload = dict(payload.items() + {
                 self.data['login']['form']['csrf']: csrf}.items())
 
@@ -105,7 +110,7 @@ class Passwd:
                 }.items())
 
         if 'csrf' in self.data['password']['form']:
-            csrf = self.get_csrf(form_page)
+            csrf = self.get_csrf(form_page, 'password')
             payload = dict(payload.items() + {
                 self.data['password']['form']['csrf']: csrf}.items())
 
