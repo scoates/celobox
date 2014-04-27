@@ -27,7 +27,6 @@ class Passwd:
 
     def new_session(self):
         self.session = requests.Session()
-        self.session.headers.update(self.data.get('headers', {}))
 
     def load_data(self, domain):
         try:
@@ -144,7 +143,9 @@ if __name__ == "__main__":
     else:
         old_pass = getpass.getpass('Old password: ')
 
-    if not passwd.sign_in(username, old_pass):
+    if passwd.sign_in(username, old_pass):
+        print "Sign in success."
+    else:
         print "Sign in failed."
         sys.exit(1)
 
