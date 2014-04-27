@@ -1,0 +1,36 @@
+{
+    "hosts": ["instagram.com"],
+    "login": {
+        "urls": {
+            "form": "https://instagram.com/accounts/login/",
+            "post": "https://instagram.com/accounts/login/"
+        },
+        "form": {
+            "username": "username",
+            "password": "password",
+            "csrf": "csrfmiddlewaretoken"
+        },
+        "success": {
+            "test": "landing",
+            "name": "http://instagram.com/"
+        }
+    },
+    "password": {
+        "urls": {
+            "form": "https://instagram.com/accounts/password/change/",
+            "post": "https://instagram.com/accounts/password/change/"
+        },
+        "form": {
+            "old_password": "old_password",
+            "new_password": ["new_password1", "new_password2"],
+            "csrf": "csrfmiddlewaretoken"
+        }
+    },
+    "csrf_token": {
+        "selector": "input[name=\"csrfmiddlewaretoken\"]",
+        "attribute": "value"
+    },
+    "notes": [
+        "Can't re-use an old password: Create a new password you haven't used before."
+    ]
+}
