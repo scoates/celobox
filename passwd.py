@@ -62,6 +62,9 @@ class Passwd:
         form_page = self.session.get(
             self.data['login']['urls']['form'], verify=verify_ssl).content
 
+        self.session.headers.update(
+            {'referer': self.data['login']['urls']['form']})
+
         payload = dict({
             self.data['login']['form']['username']: username,
             self.data['login']['form']['password']: password,
