@@ -120,6 +120,10 @@ if __name__ == "__main__":
     parser.add_argument("domain", help="domain name of app")
     parser.add_argument(
         "-d", "--debug", help="show debug output", action="store_true")
+    parser.add_argument(
+        "--nochange",
+        help="Sign in only; don't change password",
+        action="store_true")
     parser.add_argument("--username", help="Username (avoids prompt)")
     parser.add_argument("--oldpass", help="Old Password (avoids prompt)")
     parser.add_argument("--newpass", help="New Password (avoids prompt)")
@@ -148,6 +152,9 @@ if __name__ == "__main__":
     else:
         print "Sign in failed."
         sys.exit(1)
+
+    if args.nochange:
+        sys.exit(0)
 
     if args.newpass:
         new_pass = args.newpass
