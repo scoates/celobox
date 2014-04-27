@@ -1,0 +1,41 @@
+{
+    "hosts": ["linkedin.com"],
+    "login": {
+        "urls": {
+            "form": "https://www.linkedin.com/uas/login",
+            "post": "https://www.linkedin.com/uas/login-submit"
+        },
+        "form": {
+            "username": "session_key",
+            "password": "session_password",
+            "csrf": "loginCsrfParam",
+            "literal": {
+                "trk": "hb_signin"
+            }
+        },
+        "success": {
+            "test": "landing",
+            "name": "http://www.linkedin.com/nhome/?trk=hb_signin"
+        },
+        "csrf_token": {
+            "selector": "input[name=\"loginCsrfParam\"]",
+            "attribute": "value"
+        }
+    },
+    "password": {
+        "urls": {
+            "form": "https://www.linkedin.com/uas/change-password",
+            "post": "https://www.linkedin.com/uas/change-password-submit"
+        },
+        "form": {
+            "old_password": "oldPassword",
+            "new_password": ["new_password", "new_password_again"],
+            "csrf": "csrfToken"
+        },
+        "csrf_token": {
+            "selector": "input[name=\"csrfToken\"]",
+            "attribute": "value"
+        }
+    },
+    "notes": []
+}
