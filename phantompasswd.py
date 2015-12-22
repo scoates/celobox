@@ -14,22 +14,6 @@ class PasswdDomainError(Exception):
     pass
 
 class Passwd(object):
-    def __enter__(self):
-        dcap = dict(DesiredCapabilities.PHANTOMJS)
-        if 'user_agent' in self.data:
-            dcap["phantomjs.page.settings.userAgent"] = self.data['user_agent']
-
-        self.driver = webdriver.PhantomJS(desired_capabilities=dcap, service_args=self.service_args)
-        self.driver.set_window_size(1024, 768)
-        return self
-
-    @property
-    def throttle(self):
-        return self.data.get('throttle', 0)
-
-    def __exit__(self, type, value, traceback):
-        self.driver.quit()
-
     def __init__(self, domain, debug=False, service_args=''):
         self.domain = domain
         self.data = self.load_data(domain)
@@ -41,6 +25,22 @@ class Passwd(object):
         logging.basicConfig(level=loglevel)
         self.logger = logging.getLogger(self.__class__.__name__)
         self.logger.debug('Logging enabled')
+
+    def __enter__(self):
+        dcap = dict(DesiredCapabilities.PHANTOMJS)
+        if 'user_agent' in self.data:
+            dcap["phantomjs.page.settings.userAgent"] = self.data['user_agent']
+
+        self.driver = webdriver.PhantomJS(desired_capabilities=dcap, service_args=self.service_args)
+        self.driver.set_window_size(1024, 768)
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.driver.quit()
+
+    @property
+    def throttle(self):
+        return self.data.get('throttle', 0)
 
     def load_data(self, domain):
         try:
