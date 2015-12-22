@@ -1,13 +1,22 @@
 {
-    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36",
     "login": {
-        "urls": {
-            "form": "https://news.ycombinator.com/login?goto=news"
-        },
+        "url": "https://news.ycombinator.com/login?goto=news",
         "form": {
             "username": "input[name=\"acct\"]",
             "password": "input[name=\"pw\"]",
-            "submit": "input[value=\"login\"]"
+            "submit": "input[type=\"submit\"]"
+        },
+        "success": {
+            "test": "landing",
+            "name": "https://news.ycombinator.com/news"
+        }
+    },
+    "password": {
+        "url": "https://news.ycombinator.com/changepw",
+        "form": {
+            "old_password": "input[name=\"oldpw\"]",
+            "new_password": "input[name=\"pw\"]",
+            "submit": "input[type=\"submit\"]"
         },
         "success": {
             "test": "landing",
