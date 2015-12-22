@@ -2,16 +2,16 @@
     "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36",
     "login": {
         "urls": {
-            "form": "https://news.ycombinator.com/login?goto=news"
+            "form": "https://www.reddit.com/login"
         },
         "form": {
-            "username": "input[name=\"acct\"]",
-            "password": "input[name=\"pw\"]",
-            "submit": "input[value=\"login\"]"
+            "username": "#login-form input[name=\"user\"]",
+            "password": "#login-form input[name=\"passwd\"]",
+            "submit": "#login-form button[type=\"submit\"]"
         },
         "success": {
             "test": "landing",
-            "name": "https://news.ycombinator.com/news"
+            "name": "https://www.reddit.com/"
         }
     }
 }
