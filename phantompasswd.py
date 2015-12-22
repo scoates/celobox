@@ -46,7 +46,7 @@ class Passwd(object):
         try:
             return json.load(open(os.path.join('manifests', '%s.json' % domain)))
         except IOError:
-            raise PasswdDomainError('Manifest not found for %s' % domain)
+            return {}
 
     def test_success(self, container):
         if 'landing' == container['success']['test']:
@@ -54,19 +54,54 @@ class Passwd(object):
 
         raise ValueError("Unknown login verification test")
 
+    def click_login_url(self):
+        for a in self.driver.find_elements_by_tag_name('a'):
+            text = a.text.lower()
+            if 'log in' in text or 'login' in text or 'sign in' in text:
+                self.driver.get(a.get_attribute('href'))
+                return True
+        return False
+
+    def find_login_form(self):
+        for form in self.driver.find_elements_by_tag_name('form'):
+            text_input = form.find_elements_by_css_selector('input[type="text"]')
+            password_input = form.find_elements_by_css_selector('input[type="password"]')
+
+            if len(text_input) == 1 and len(password_input) == 1:
+                return form
+
+    def heuristic_sign_in(self, username, password):
+        self.driver.get('http://{domain}'.format(domain=self.domain))
+        time.sleep(3)
+        login_clicked = self.click_login_url()
+        if login_clicked:
+            time.sleep(3)
+            url = self.driver.current_url
+            form = self.find_login_form()
+            if form:
+                form.find_element_by_css_selector('input[type="text"]').send_keys(username)
+                form.find_element_by_css_selector('input[type="password"]').send_keys(password)
+                form.find_element_by_css_selector('input[type="password"]').submit()
+                time.sleep(3)
+                return url != self.driver.current_url
+
+        return False
+
     def sign_in(self, username, password):
         self.logger.debug('Signing in: %s' % username)
-        login_data = self.data['login']
+        login_data = self.data.get('login')
+        if login_data is None:
+            success = self.heuristic_sign_in(username, password)
+        else:
+            self.driver.get(login_data['url'])
+            time.sleep(self.throttle)
+            self.driver.find_element_by_css_selector(login_data['form']['username']).send_keys(username)
+            self.driver.find_element_by_css_selector(login_data['form']['password']).send_keys(password)
 
-        self.driver.get(login_data['url'])
-        time.sleep(self.throttle)
-        self.driver.find_element_by_css_selector(login_data['form']['username']).send_keys(username)
-        self.driver.find_element_by_css_selector(login_data['form']['password']).send_keys(password)
+            self.driver.find_element_by_css_selector(login_data['form']['submit']).submit()
+            time.sleep(self.throttle)
 
-        self.driver.find_element_by_css_selector(login_data['form']['submit']).submit()
-        time.sleep(self.throttle)
-
-        success = self.test_success(self.data['login'])
+            success = self.test_success(self.data['login'])
         if success:
             self.username = username
             self.old_pass = password
