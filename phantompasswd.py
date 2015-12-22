@@ -19,22 +19,17 @@ class Passwd(object):
         if 'user_agent' in self.data:
             dcap["phantomjs.page.settings.userAgent"] = self.data['user_agent']
 
-
-        service_args = [
-            '--proxy=localhost:8080',
-            '--proxy-type=http',
-        ]
-
-        self.driver = webdriver.PhantomJS(desired_capabilities=dcap, service_args=service_args)
+        self.driver = webdriver.PhantomJS(desired_capabilities=dcap, service_args=self.service_args)
         self.driver.set_window_size(1024, 768)
         return self
 
     def __exit__(self, type, value, traceback):
         self.driver.quit()
 
-    def __init__(self, domain, debug=False):
+    def __init__(self, domain, debug=False, service_args=''):
         self.domain = domain
         self.data = self.load_data(domain)
+        self.service_args = service_args
         if debug:
             loglevel = logging.DEBUG
         else:
@@ -64,7 +59,7 @@ class Passwd(object):
         self.driver.find_element_by_css_selector(login_data['form']['username']).send_keys(username)
         self.driver.find_element_by_css_selector(login_data['form']['password']).send_keys(password)
 
-        self.driver.find_element_by_css_selector(login_data['form']['submit']).click()
+        self.driver.find_element_by_css_selector(login_data['form']['submit']).submit()
         time.sleep(10)
 
         success = self.test_success(self.data['login'])
@@ -107,7 +102,7 @@ class Passwd(object):
     #     return success
 
 def main():
-    from argparse import ArgumentParser
+    from argparse import ArgumentParser, REMAINDER
 
     parser = ArgumentParser()
     parser.add_argument("domain", help="domain name of app")
@@ -120,9 +115,10 @@ def main():
     parser.add_argument("--username", help="Username (avoids prompt)")
     parser.add_argument("--oldpass", help="Old Password (avoids prompt)")
     parser.add_argument("--newpass", help="New Password (avoids prompt)")
+    parser.add_argument("--phantom", help="PhantomJS arguments (use this last; it gobbles up the remainder)", nargs=REMAINDER)
     args = parser.parse_args()
 
-    with Passwd(args.domain, debug=args.debug) as passwd:
+    with Passwd(args.domain, debug=args.debug, service_args=args.phantom) as passwd:
         if args.username:
             username = args.username
             print "Using provided username"
