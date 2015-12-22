@@ -19,7 +19,13 @@ class Passwd(object):
         if 'user_agent' in self.data:
             dcap["phantomjs.page.settings.userAgent"] = self.data['user_agent']
 
-        self.driver = webdriver.PhantomJS(desired_capabilities=dcap)
+
+        service_args = [
+            '--proxy=localhost:8080',
+            '--proxy-type=http',
+        ]
+
+        self.driver = webdriver.PhantomJS(desired_capabilities=dcap, service_args=service_args)
         self.driver.set_window_size(1024, 768)
         return self
 
