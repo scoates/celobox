@@ -58,7 +58,7 @@ class Passwd(object):
         self.logger.debug('Signing in: %s' % username)
         login_data = self.data['login']
 
-        self.driver.get(login_data['urls']['form'])
+        self.driver.get(login_data['url'])
         time.sleep(self.throttle)
         self.driver.find_element_by_css_selector(login_data['form']['username']).send_keys(username)
         self.driver.find_element_by_css_selector(login_data['form']['password']).send_keys(password)
@@ -72,38 +72,27 @@ class Passwd(object):
             self.old_pass = password
         return success
 
-    # def change_password(self, password):
-    #     self.logger.debug('Changing password.')
-    #     form_page = self.session.get(
-    #         self.data['password']['urls']['form']).content
+    def change_password(self, password):
+        self.logger.debug('Changing password.')
+        password_data = self.data['password']
+        self.driver.get(password_data['url'])
 
-    #     if 'literal' in self.data['password']['form']:
-    #         payload = self.data['password']['form']['literal']
-    #     else:
-    #         payload = {}
+        time.sleep(self.throttle)
+        if 'old_password' in password_data['form']:
+            self.driver.find_element_by_css_selector(password_data['form']['old_password']).send_keys(self.old_pass)
+        self.driver.find_element_by_css_selector(password_data['form']['new_password']).send_keys(password)
+        if 'verify_password' in password_data['form']:
+            self.driver.find_element_by_css_selector(password_data['form']['verify_password']).send_keys(password)
 
-    #     for field in self.data['password']['form']['new_password']:
-    #         payload[field] = password
+        self.driver.find_element_by_css_selector(password_data['form']['submit']).submit()
+        time.sleep(self.throttle)
 
-    #     if 'old_password' in self.data['password']['form']:
-    #         payload = dict(payload.items() + {
-    #             self.data['password']['form']['old_password']: self.old_pass
-    #             }.items())
+        self.driver.delete_all_cookies()
 
-    #     if 'csrf' in self.data['password']['form']:
-    #         csrf = self.get_csrf(form_page, 'password')
-    #         payload = dict(payload.items() + {
-    #             self.data['password']['form']['csrf']: csrf}.items())
-
-    #     self.session.headers.update(
-    #         {'referer': self.data['password']['urls']['form']})
-
-    #     self.session.post(
-    #         self.data['password']['urls']['post'], data=payload)
-    #     success = self.sign_in(self.username, password)
-    #     if success:
-    #         self.old_pass = password
-    #     return success
+        success = self.sign_in(self.username, password)
+        if success:
+            self.old_pass = password
+        return success
 
 def main():
     from argparse import ArgumentParser, REMAINDER
@@ -141,24 +130,24 @@ def main():
             print "Sign in failed."
             sys.exit(1)
 
-    if args.nochange:
-        sys.exit(0)
+        if args.nochange:
+            sys.exit(0)
 
-    # if args.newpass:
-    #     new_pass = args.newpass
-    # else:
-    #     while True:
-    #         new_pass = getpass.getpass('New password: ')
-    #         new_pass2 = getpass.getpass('New password (again): ')
-    #         if new_pass == new_pass2:
-    #             break
-    #         else:
-    #             print "Passwords do not match."
+        if args.newpass:
+            new_pass = args.newpass
+        else:
+            while True:
+                new_pass = getpass.getpass('New password: ')
+                new_pass2 = getpass.getpass('New password (again): ')
+                if new_pass == new_pass2:
+                    break
+                else:
+                    print "Passwords do not match."
 
-    # if passwd.change_password(new_pass):
-    #     print "Password changed!"
-    # else:
-    #     print "Password change failed."
+        if passwd.change_password(new_pass):
+            print "Password changed!"
+        else:
+            print "Password change failed."
 
 
 if __name__ == "__main__":
