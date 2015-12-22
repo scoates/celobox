@@ -23,6 +23,10 @@ class Passwd(object):
         self.driver.set_window_size(1024, 768)
         return self
 
+    @property
+    def throttle(self):
+        return self.data.get('throttle', 0)
+
     def __exit__(self, type, value, traceback):
         self.driver.quit()
 
@@ -55,12 +59,12 @@ class Passwd(object):
         login_data = self.data['login']
 
         self.driver.get(login_data['urls']['form'])
-        time.sleep(10)
+        time.sleep(self.throttle)
         self.driver.find_element_by_css_selector(login_data['form']['username']).send_keys(username)
         self.driver.find_element_by_css_selector(login_data['form']['password']).send_keys(password)
 
         self.driver.find_element_by_css_selector(login_data['form']['submit']).submit()
-        time.sleep(10)
+        time.sleep(self.throttle)
 
         success = self.test_success(self.data['login'])
         if success:
