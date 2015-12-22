@@ -8,7 +8,11 @@ import getpass
 import os
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import NoSuchElementException
 import time
+import requests
+
+USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36"
 
 class PasswdDomainError(Exception):
     pass
@@ -16,7 +20,6 @@ class PasswdDomainError(Exception):
 class Passwd(object):
     def __init__(self, domain, debug=False, service_args=''):
         self.domain = domain
-        self.data = self.load_data(domain)
         self.service_args = service_args
         if debug:
             loglevel = logging.DEBUG
@@ -28,11 +31,13 @@ class Passwd(object):
 
     def __enter__(self):
         dcap = dict(DesiredCapabilities.PHANTOMJS)
-        if 'user_agent' in self.data:
-            dcap["phantomjs.page.settings.userAgent"] = self.data['user_agent']
+        dcap["phantomjs.page.settings.userAgent"] = USER_AGENT
 
         self.driver = webdriver.PhantomJS(desired_capabilities=dcap, service_args=self.service_args)
         self.driver.set_window_size(1024, 768)
+
+        self.data = self.load_data(self.domain)
+
         return self
 
     def __exit__(self, type, value, traceback):
@@ -42,11 +47,20 @@ class Passwd(object):
     def throttle(self):
         return self.data.get('throttle', 0)
 
+    def load_manifest(self, domain):
+        self.driver.get("http://{domain}".format(domain=domain))
+        try:
+            elt = self.driver.find_element_by_css_selector('link[rel="password-manifest"]')
+            resp = requests.get(elt.get_attribute('href'), verify=False)
+            return json.loads(resp.content)
+        except NoSuchElementException:
+            return {}
+
     def load_data(self, domain):
         try:
             return json.load(open(os.path.join('manifests', '%s.json' % domain)))
         except IOError:
-            return {}
+            return self.load_manifest(domain)
 
     def test_success(self, container):
         if 'landing' == container['success']['test']:
