@@ -18,9 +18,12 @@ class PasswdDomainError(Exception):
     pass
 
 class Passwd(object):
-    def __init__(self, domain, debug=False, service_args=''):
+    def __init__(self, domain, debug=False, service_args='', ignore_ssl_errors=False):
         self.domain = domain
+        self.ignore_ssl_errors = ignore_ssl_errors
         self.service_args = service_args
+        if ignore_ssl_errors:
+            self.service_args = (self.service_args or []) + ['--ignore-ssl-errors=yes']
         if debug:
             loglevel = logging.DEBUG
         else:
@@ -32,7 +35,6 @@ class Passwd(object):
     def __enter__(self):
         dcap = dict(DesiredCapabilities.PHANTOMJS)
         dcap["phantomjs.page.settings.userAgent"] = USER_AGENT
-
         self.driver = webdriver.PhantomJS(desired_capabilities=dcap, service_args=self.service_args)
         self.driver.set_window_size(1024, 768)
 
@@ -51,7 +53,7 @@ class Passwd(object):
         self.driver.get("http://{domain}".format(domain=domain))
         try:
             elt = self.driver.find_element_by_css_selector('link[rel="password-manifest"]')
-            resp = requests.get(elt.get_attribute('href'), verify=False)
+            resp = requests.get(elt.get_attribute('href'), verify=not self.ignore_ssl_errors)
             return json.loads(resp.content)
         except NoSuchElementException:
             return {}
@@ -157,10 +159,11 @@ def main():
     parser.add_argument("--username", help="Username (avoids prompt)")
     parser.add_argument("--oldpass", help="Old Password (avoids prompt)")
     parser.add_argument("--newpass", help="New Password (avoids prompt)")
+    parser.add_argument("--ignore-ssl-errors", help="Ignore SSL certificate errors", action="store_true")
     parser.add_argument("--phantom", help="PhantomJS arguments (use this last; it gobbles up the remainder)", nargs=REMAINDER)
     args = parser.parse_args()
 
-    with Passwd(args.domain, debug=args.debug, service_args=args.phantom) as passwd:
+    with Passwd(args.domain, debug=args.debug, service_args=args.phantom, ignore_ssl_errors=args.ignore_ssl_errors) as passwd:
         if args.username:
             username = args.username
             print "Using provided username"
