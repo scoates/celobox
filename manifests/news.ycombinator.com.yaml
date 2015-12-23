@@ -1,0 +1,16 @@
+celobox_manifest: 0.2.0
+hosts:
+    - news.ycombinator.com
+login:
+    url: https://news.ycombinator.com/login?goto=news
+    username: input[name="acct"]
+    password: input[name="pw"]
+    submit: input[value="login"]
+    success:
+        landing: https://news.ycombinator.com/news
+
+password:
+    url: https://news.ycombinator.com/changepw
+    old_password: input[name="oldpw"]
+    new_password: input[name="pw"]
+    submit: input[value="Change"]
