@@ -77,10 +77,7 @@ class Passwd(object):
 
         for content_type in ContentTypes:
             try:
-                content = open(resource_filename(
-                    __name__,
-                    os.path.join(manifests_path, '{}.{}'.format(domain, content_type.value))
-                ))
+                content = open(os.path.join(manifests_path, '{}.{}'.format(domain, content_type.value)))
                 return self.load_data_from_content(content, content_type)
             except IOError:
                 # file unreadable (not found)
@@ -121,7 +118,7 @@ class Passwd(object):
 
     def _get_manifests_path(self):
         """ todo """
-        return 'manifests'
+        return resource_filename(__name__, 'manifests')
 
 
     def _get_safe_domain(self, domain):
