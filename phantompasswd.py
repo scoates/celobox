@@ -9,15 +9,27 @@ import os
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
+from enum import Enum
 import time
 import requests
+import yaml
 
 USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36"
+
 
 class PasswdDomainError(Exception):
     pass
 
+
+class ContentTypes(Enum):
+    """Enumerate possible content type hints."""
+
+    JSON = 'json'
+    YAML = 'yaml'
+
+
 class Passwd(object):
+
     def __init__(self, domain, debug=False, service_args='', ignore_ssl_errors=False):
         self.domain = domain
         self.ignore_ssl_errors = ignore_ssl_errors
@@ -54,15 +66,64 @@ class Passwd(object):
         try:
             elt = self.driver.find_element_by_css_selector('link[rel="password-manifest"]')
             resp = requests.get(elt.get_attribute('href'), verify=not self.ignore_ssl_errors)
-            return json.loads(resp.content)
+            return self.load_data_from_content(resp.content)
         except NoSuchElementException:
             return {}
 
     def load_data(self, domain):
-        try:
-            return json.load(open(os.path.join('manifests', '%s.json' % domain)))
-        except IOError:
-            return self.load_manifest(domain)
+        manifests_path = self._get_manifests_path()
+        domain = self._get_safe_domain(domain)
+
+        for content_type in ContentTypes:
+            try:
+                content = open(os.path.join(manifests_path, '{}.{}'.format(domain, content_type.value)))
+                return self.load_data_from_content(content, content_type)
+            except IOError:
+                # file unreadable (not found)
+                pass
+
+        # have not yet found a local manifest, so try to load via web
+        return self.load_manifest(domain)
+
+
+    def load_data_from_content(self, content, hint=None):
+        if hint is None or hint == ContentTypes.JSON:
+            try:
+                return json.loads(content)
+            except ValueError:
+                if hint == self.JSON:
+                    return False
+                # otherwise: pass through to other parsers
+
+        if hint is None or hint == ContentTypes.JSON:
+            try:
+                parsed = yaml.safe_load(content)
+                # most strings parse to be valid YAML (it's very permissive)
+                # so, let's check a known key to be sure.
+                if parsed and 'celobox_manifest' in parsed:
+                    return parsed
+                if hint == self.YAML:
+                    # no key in expected-to-be-YAML content
+                    return False
+                # otherwise: pass through (this is not YAML)
+            except yaml.YAMLError:
+                if hint == self.YAML:
+                    return False
+                # otherwise: pass through to other parsers
+
+        # out of parsers; no return yet, means we couldn't parse the content
+        return False
+
+
+    def _get_manifests_path(self):
+        """ todo """
+        return 'manifests'
+
+
+    def _get_safe_domain(self, domain):
+        """ todo: avoid "/path/to/somesecret" or "../../etc/whatever" """
+        return domain
+
 
     def test_success(self, container):
         if 'landing' == container['success']['test']:
