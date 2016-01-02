@@ -95,7 +95,7 @@ class Passwd(object):
                     return False
                 # otherwise: pass through to other parsers
 
-        if hint is None or hint == ContentTypes.JSON:
+        if hint is None or hint == ContentTypes.YAML:
             try:
                 parsed = yaml.safe_load(content)
                 # most strings parse to be valid YAML (it's very permissive)
