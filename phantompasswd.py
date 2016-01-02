@@ -91,7 +91,7 @@ class Passwd(object):
             try:
                 return json.load(content)
             except ValueError:
-                if hint == self.JSON:
+                if hint == ContentTypes.JSON:
                     return False
                 # otherwise: pass through to other parsers
 
@@ -102,12 +102,12 @@ class Passwd(object):
                 # so, let's check a known key to be sure.
                 if parsed and 'celobox_manifest' in parsed:
                     return parsed
-                if hint == self.YAML:
+                if hint == ContentTypes.YAML:
                     # no key in expected-to-be-YAML content
                     return False
                 # otherwise: pass through (this is not YAML)
             except yaml.YAMLError:
-                if hint == self.YAML:
+                if hint == ContentTypes.YAML:
                     return False
                 # otherwise: pass through to other parsers
 
