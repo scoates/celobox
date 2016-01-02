@@ -9,20 +9,26 @@ import os
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
+from enum import Enum
 import time
 import requests
 import yaml
 
 USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36"
 
+
 class PasswdDomainError(Exception):
     pass
 
-class Passwd(object):
 
-    # for content type hints
+class ContentTypes(Enum):
+    """Enumerate possible content type hints."""
+
     JSON = 'json'
     YAML = 'yaml'
+
+
+class Passwd(object):
 
     def __init__(self, domain, debug=False, service_args='', ignore_ssl_errors=False):
         self.domain = domain
@@ -68,9 +74,9 @@ class Passwd(object):
         manifests_path = self._get_manifests_path()
         domain = self._get_safe_domain(domain)
 
-        for content_type in [self.JSON, self.YAML]:
+        for content_type in ContentTypes:
             try:
-                content = open(os.path.join(manifests_path, '{}.{}'.format(domain, content_type)))
+                content = open(os.path.join(manifests_path, '{}.{}'.format(domain, content_type.value)))
                 return self.load_data_from_content(content, content_type)
             except IOError:
                 # file unreadable (not found)
@@ -81,7 +87,7 @@ class Passwd(object):
 
 
     def load_data_from_content(self, content, hint=None):
-        if hint is None or hint == self.JSON:
+        if hint is None or hint == ContentTypes.JSON:
             try:
                 return json.loads(content)
             except ValueError:
@@ -89,7 +95,7 @@ class Passwd(object):
                     return False
                 # otherwise: pass through to other parsers
 
-        if hint is None or hint == self.YAML:
+        if hint is None or hint == ContentTypes.JSON:
             try:
                 parsed = yaml.safe_load(content)
                 # most strings parse to be valid YAML (it's very permissive)
