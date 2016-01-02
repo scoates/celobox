@@ -1,10 +1,13 @@
 #!/usr/bin/env python
+import os
 import sys
 import json
 import logging
 import getpass
 import requests
 from bs4 import BeautifulSoup
+
+from pkg_resources import resource_filename
 
 
 class PasswdDomainException(Exception):
@@ -31,7 +34,9 @@ class Passwd:
 
     def load_data(self, domain):
         try:
-            return json.load(open('manifests/%s.json' % domain))
+            return json.load(open(
+                resource_filename(__name__, os.path.join('manifests', '{}.json'.format(domain)))
+            ))
         except (IOError):
             raise PasswdDomainException
 

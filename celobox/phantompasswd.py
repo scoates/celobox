@@ -13,6 +13,7 @@ from enum import Enum
 import time
 import requests
 import yaml
+from pkg_resources import resource_filename
 
 USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36"
 
@@ -76,7 +77,10 @@ class Passwd(object):
 
         for content_type in ContentTypes:
             try:
-                content = open(os.path.join(manifests_path, '{}.{}'.format(domain, content_type.value)))
+                content = open(resource_filename(
+                    __name__,
+                    os.path.join(manifests_path, '{}.{}'.format(domain, content_type.value))
+                ))
                 return self.load_data_from_content(content, content_type)
             except IOError:
                 # file unreadable (not found)
