@@ -94,7 +94,7 @@ class Passwd(object):
                 parsed = yaml.safe_load(content)
                 # most strings parse to be valid YAML (it's very permissive)
                 # so, let's check a known key to be sure.
-                if 'celobox_manifest' in parsed:
+                if parsed and 'celobox_manifest' in parsed:
                     return parsed
                 if hint == self.YAML:
                     # no key in expected-to-be-YAML content
