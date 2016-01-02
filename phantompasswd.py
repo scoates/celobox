@@ -89,7 +89,7 @@ class Passwd(object):
     def load_data_from_content(self, content, hint=None):
         if hint is None or hint == ContentTypes.JSON:
             try:
-                return json.loads(content)
+                return json.load(content)
             except ValueError:
                 if hint == self.JSON:
                     return False
