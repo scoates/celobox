@@ -1,34 +1,21 @@
 {
+    "celobox_manifest": "0.2.0",
     "hosts": ["instagram.com"],
     "login": {
-        "urls": {
-            "form": "https://instagram.com/accounts/login/",
-            "post": "https://instagram.com/accounts/login/"
-        },
-        "form": {
-            "username": "username",
-            "password": "password",
-            "csrf": "csrfmiddlewaretoken"
-        },
+        "url": "https://instagram.com/accounts/login/",
+        "username": "input[name=\"username\"]",
+        "password": "input[name=\"password\"]",
+        "submit": "button",
         "success": {
-            "test": "landing",
-            "name": "http://instagram.com/"
+            "landing": "http://instagram.com/"
         }
     },
     "password": {
-        "urls": {
-            "form": "https://instagram.com/accounts/password/change/",
-            "post": "https://instagram.com/accounts/password/change/"
-        },
-        "form": {
-            "old_password": "old_password",
-            "new_password": ["new_password1", "new_password2"],
-            "csrf": "csrfmiddlewaretoken"
-        }
-    },
-    "csrf_token": {
-        "selector": "input[name=\"csrfmiddlewaretoken\"]",
-        "attribute": "value"
+        "url": "https://instagram.com/accounts/password/change/",
+        "old_password": "input[name=\"old_password\"]",
+        "new_password": "input[name=\"new_password1\"]",
+        "verify_password": "input[name=\"new_password2\"]",
+        "submit": "button"
     },
     "notes": [
         "Can't re-use an old password: Create a new password you haven't used before."

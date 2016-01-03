@@ -1,25 +1,20 @@
 {
-    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36",
+    "celobox_manifest": "0.2.0",
     "throttle": 5,
     "login": {
         "url": "https://www.reddit.com/login",
-        "form": {
-            "username": "#login-form input[name=\"user\"]",
-            "password": "#login-form input[name=\"passwd\"]",
-            "submit": "#login-form button[type=\"submit\"]"
-        },
+        "username": "#login-form input[name=\"user\"]",
+        "password": "#login-form input[name=\"passwd\"]",
+        "submit": "#login-form button[type=\"submit\"]",
         "success": {
-            "test": "landing",
-            "name": "https://www.reddit.com/"
+            "landing": "https://www.reddit.com/"
         }
     },
     "password": {
         "url": "https://www.reddit.com/prefs/update/",
-        "form": {
-            "old_password": "#pref-update-password input[name=\"curpass\"]",
-            "new_password": "#pref-update-password input[name=\"newpass\"]",
-            "verify_password": "#pref-update-password input[name=\"verpass\"]",
-            "submit": "#pref-update-password button[type=\"submit\"]"
-        }
+        "old_password": "#pref-update-password input[name=\"curpass\"]",
+        "new_password": "#pref-update-password input[name=\"newpass\"]",
+        "verify_password": "#pref-update-password input[name=\"verpass\"]",
+        "submit": "#pref-update-password button[type=\"submit\"]"
     }
 }

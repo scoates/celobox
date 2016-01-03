@@ -1,43 +1,23 @@
 {
+    "celobox_manifest": "0.2.0",
     "hosts": ["github.com"],
     "login": {
-        "urls": {
-            "form": "https://github.com/login",
-            "post": "https://github.com/session"
-        },
-        "form": {
-            "username": "login",
-            "password": "password",
-            "csrf": "authenticity_token",
-            "literal": {
-                "commit": "Sign in"
-            }
-        },
+        "url": "https://github.com/login",
+        "username": "input[name=\"login\"]",
+        "password": "input[name=\"password\"]",
+        "submit": "input[name=\"commit\"]",
         "success": {
-            "test": "landing",
-            "name": "https://github.com/"
+            "landing": "https://github.com/"
         }
     },
     "password": {
-        "urls": {
-            "form": "https://github.com/settings/admin",
-            "post": "https://github.com/account"
-        },
-        "form": {
-            "old_password": "user[old_password]",
-            "new_password": ["user[password]", "user[password_confirmation]"],
-            "csrf": "authenticity_token",
-            "literal": {
-                "_method": "put"
-            }
-        }
-    },
-    "csrf_token": {
-        "selector": "meta[name=\"csrf-token\"]",
-        "attribute": "content"
+        "url": "https://github.com/settings/admin",
+        "old_password": "input[name=\"user[old_password]\"]",
+        "new_password": "input[name=\"user[password]\"]",
+        "verify_password": "input[name=\"user[password_confirmation]\"]",
+        "submit": "#change_password button"
     },
     "notes": [
         "Passwords must contain a number."
     ]
-
 }

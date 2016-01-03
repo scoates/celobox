@@ -126,8 +126,8 @@ class Passwd(object):
 
 
     def test_success(self, container):
-        if 'landing' == container['success']['test']:
-            return container['success']['name'] == self.driver.current_url
+        if 'landing' in container['success']:
+            return container['success']['landing'] == self.driver.current_url
 
         raise ValueError("Unknown login verification test")
 
@@ -172,10 +172,10 @@ class Passwd(object):
         else:
             self.driver.get(login_data['url'])
             time.sleep(self.throttle)
-            self.driver.find_element_by_css_selector(login_data['form']['username']).send_keys(username)
-            self.driver.find_element_by_css_selector(login_data['form']['password']).send_keys(password)
+            self.driver.find_element_by_css_selector(login_data['username']).send_keys(username)
+            self.driver.find_element_by_css_selector(login_data['password']).send_keys(password)
 
-            self.driver.find_element_by_css_selector(login_data['form']['submit']).submit()
+            self.driver.find_element_by_css_selector(login_data['submit']).submit()
             time.sleep(self.throttle)
 
             success = self.test_success(self.data['login'])
@@ -190,13 +190,13 @@ class Passwd(object):
         self.driver.get(password_data['url'])
 
         time.sleep(self.throttle)
-        if 'old_password' in password_data['form']:
-            self.driver.find_element_by_css_selector(password_data['form']['old_password']).send_keys(self.old_pass)
-        self.driver.find_element_by_css_selector(password_data['form']['new_password']).send_keys(password)
-        if 'verify_password' in password_data['form']:
-            self.driver.find_element_by_css_selector(password_data['form']['verify_password']).send_keys(password)
+        if 'old_password' in password_data:
+            self.driver.find_element_by_css_selector(password_data['old_password']).send_keys(self.old_pass)
+        self.driver.find_element_by_css_selector(password_data['new_password']).send_keys(password)
+        if 'verify_password' in password_data:
+            self.driver.find_element_by_css_selector(password_data['verify_password']).send_keys(password)
 
-        self.driver.find_element_by_css_selector(password_data['form']['submit']).submit()
+        self.driver.find_element_by_css_selector(password_data['submit']).submit()
         time.sleep(self.throttle)
 
         self.driver.delete_all_cookies()
