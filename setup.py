@@ -1,9 +1,9 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
 setup(
     name="celobox",
     version="0.1a",
-    packages=find_packages(),
+    packages=['celobox'],
     install_requires=[
         'selenium',
         'requests',
