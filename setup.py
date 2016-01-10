@@ -12,7 +12,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'phantompasswd = celobox.phantompasswd:main'
+            'celobox = celobox.phantompasswd:main'
         ]
     },
     package_data={
