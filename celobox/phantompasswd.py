@@ -13,6 +13,7 @@ from enum import Enum
 import time
 import requests
 import yaml
+from pkg_resources import resource_filename
 
 USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36"
 
@@ -117,7 +118,7 @@ class Passwd(object):
 
     def _get_manifests_path(self):
         """ todo """
-        return 'manifests'
+        return resource_filename(__name__, 'manifests')
 
 
     def _get_safe_domain(self, domain):
