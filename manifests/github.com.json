@@ -1,11 +1,12 @@
 {
     "celobox_manifest": "0.2.0",
     "hosts": ["github.com"],
+    "needs_real_browser": true,
     "login": {
         "url": "https://github.com/login",
-        "username": "input[name=\"login\"]",
-        "password": "input[name=\"password\"]",
-        "submit": "input[name=\"commit\"]",
+        "username": "#login_field",
+        "password": "#password",
+        "submit": ".btn",
         "success": {
             "landing": "https://github.com/"
         }
