@@ -1,6 +1,7 @@
 {
     "celobox_manifest": "0.2.0",
     "throttle": 5,
+    "needs_real_browser": true,
     "hosts": ["instagram.com"],
     "login": {
         "url": "https://www.instagram.com/accounts/login/",
@@ -13,10 +14,10 @@
     },
     "password": {
         "url": "https://www.instagram.com/accounts/password/change/",
-        "old_password": "input[name=\"old_password\"]",
-        "new_password": "input[name=\"new_password1\"]",
-        "verify_password": "input[name=\"new_password2\"]",
-        "submit": "input[type=\"submit\"]"
+        "old_password": "#cppOldPassword",
+        "new_password": "#cppNewPassword",
+        "verify_password": "#cppConfirmPassword",
+        "submit": "button"
     },
     "notes": [
         "Can't re-use an old password: Create a new password you haven't used before."
