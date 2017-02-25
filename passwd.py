@@ -31,16 +31,21 @@ class ContentTypes(Enum):
 
 class Passwd(object):
 
-    def __init__(self, domain, debug=False, service_args=[], ignore_ssl_errors=False):
+    def __init__(self, domain, debug=None, service_args=[], ignore_ssl_errors=False):
         self.domain = domain
         self.ignore_ssl_errors = ignore_ssl_errors
         self.service_args = service_args
         if ignore_ssl_errors:
             self.service_args = (self.service_args or []) + ['--ignore-ssl-errors=yes']
+        if debug is None:
+            debug = bool(os.environ.get('DEBUG', False))
+
         if debug:
             loglevel = logging.DEBUG
         else:
             loglevel = logging.INFO
+
+        self.debug = debug
         logging.basicConfig(level=loglevel)
         self.logger = logging.getLogger(self.__class__.__name__)
         self.logger.debug('Logging enabled')
@@ -75,6 +80,10 @@ class Passwd(object):
     @property
     def throttle(self):
         return self.data.get('throttle', 0)
+
+    @property
+    def wait_after_login(self):
+        return self.data.get('wait_after_login', 0)
 
     def load_manifest(self, domain):
         self.phantom_driver.get("http://{domain}".format(domain=domain))
@@ -142,7 +151,15 @@ class Passwd(object):
 
     def test_success(self, container):
         if 'landing' in container['success']:
-            return container['success']['landing'] == self.driver.current_url
+            if container['success']['landing'] == self.driver.current_url:
+                return True
+            else:
+                self.logger.debug("Testing success (landing). Seeking {} ; got {}".format(
+                  container['success']['landing'], self.driver.current_url
+                ))
+                if self.debug:
+                    self.write_screenshot()
+                return False
 
         raise ValueError("Unknown login verification test")
 
@@ -185,15 +202,41 @@ class Passwd(object):
         if login_data is None:
             success = self.heuristic_sign_in(username, password)
         else:
-            self.driver.get(login_data['url'])
+            if 'urls' in login_data:
+                login_url = login_data['urls']['form']
+            else:
+                login_url = login_data['url']
+            self.driver.get(login_url)
             time.sleep(self.throttle)
-            self.driver.find_element_by_css_selector(login_data['username']).send_keys(username)
-            self.driver.find_element_by_css_selector(login_data['password']).send_keys(password)
+            username_element = self.driver.find_element_by_css_selector(login_data['username'])
+            password_element = self.driver.find_element_by_css_selector(login_data['password'])
+            submit_element = self.driver.find_element_by_css_selector(login_data['submit'])
 
-            self.driver.find_element_by_css_selector(login_data['submit']).submit()
+
+
+            if username_element:
+                self.logger.debug('Found username element.')
+            else:
+                self.logger.debug('Could not find username element.')
+            if password_element:
+                self.logger.debug('Found password element.')
+            else:
+                self.logger.debug('Could not find password element.')
+            if submit_element:
+                self.logger.debug('Found submit element.')
+            else:
+                self.logger.debug('Could not find submit element.')
+
+            username_element.send_keys(username)
+            password_element.send_keys(password)
+            submit_element.submit()
+
             time.sleep(self.throttle)
+            self.logger.debug('Waiting {}s after login.'.format(self.wait_after_login))
+            time.sleep(self.wait_after_login)
 
             success = self.test_success(self.data['login'])
+
         if success:
             self.username = username
             self.old_pass = password
@@ -220,6 +263,18 @@ class Passwd(object):
         if success:
             self.old_pass = password
         return success
+
+    def write_screenshot(self, e=None, filename="screen.png"):
+
+        self.logger.debug("Saving screenshot: {}".format(filename))
+
+        if isinstance(e, Exception):
+            with open(filename, 'w') as f:
+                from base64 import b64decode
+                f.write(b64decode(e.screen))
+        else:
+            self.driver.save_screenshot(filename)
+
 
 def main():
     from argparse import ArgumentParser, REMAINDER
@@ -259,10 +314,8 @@ def main():
                 print "Sign in failed."
                 sys.exit(1)
         except NoSuchElementException as e:
-            with open('screen.png', 'w') as f:
-                from base64 import b64decode
-                f.write(b64decode(e.screen))
-                raise e
+            passwd.write_screenshot(e)
+            raise e
 
         if args.nochange:
             sys.exit(0)
