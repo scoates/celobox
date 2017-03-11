@@ -14,10 +14,10 @@
     },
     "password": {
         "url": "https://www.linkedin.com/uas/change-password",
-        "old_password": "input[name=\"oldPassword\"]",
-        "new_password": "input[name=\"new_password\"]",
-        "verify_password": "input[name=\"new_password_again\"]",
-        "submit": "#change_password button"
+        "old_password": "#oldPassword-editPassword",
+        "new_password": "#new_password-newPassword-editPassword",
+        "verify_password": "#new_password_again-newPassword-editPassword",
+        "submit": "#change-password-submit"
     },
     "notes": []
 }
