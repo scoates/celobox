@@ -1,22 +1,19 @@
 #!/usr/bin/env python
 
-from selenium import webdriver
 import sys
 import json
 import logging
 import getpass
 import os
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 from enum import Enum
 import time
 import requests
 import yaml
 
 
-USER_AGENT = os.environ.get("USER_AGENT", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36")
+CHROME_PATH = os.environ.get("CHROME_PATH", "/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary")
 
 class PasswdDomainError(Exception):
     pass
@@ -51,31 +48,17 @@ class Passwd(object):
         self.logger.debug('Logging enabled')
 
     def __enter__(self):
-        dcap = dict(DesiredCapabilities.PHANTOMJS)
-        dcap["phantomjs.page.settings.userAgent"] = USER_AGENT
-        self.phantom_driver = webdriver.PhantomJS(desired_capabilities=dcap, service_args=self.service_args)
-        self.phantom_driver.set_window_size(1024, 768)
-
-        # default to the phantom driver
-        # we do this before load_data because load_data does a GET to attempt to load the manifest
-        self.driver = self.phantom_driver
-
         self.data = self.load_data(self.domain)
-        if self.data and self.data.get('needs_real_browser', False):
-            # load the *real* driver, but only if we have to (use phantom otherwise)
-            self.real_driver = webdriver.Chrome()
-            self.real_driver.set_window_size(1024, 768)
-
-            self.driver = self.real_driver
-        else:
-            self.real_driver = None
+        chrome_options = webdriver.chrome.options.Options()
+        chrome_options.binary_location = CHROME_PATH
+        chrome_options.add_argument("headless")
+        chrome_options.add_argument("disable-gpu")
+        self.driver = webdriver.Chrome(chrome_options=chrome_options)
 
         return self
 
     def __exit__(self, type, value, traceback):
-        self.phantom_driver.quit()
-        if self.real_driver:
-            self.real_driver.quit()
+        self.driver.quit()
 
     @property
     def throttle(self):
@@ -86,9 +69,9 @@ class Passwd(object):
         return self.data.get('wait_after_login', 0)
 
     def load_manifest(self, domain):
-        self.phantom_driver.get("http://{domain}".format(domain=domain))
+        self.driver.get("http://{domain}".format(domain=domain))
         try:
-            elt = self.phantom_driver.find_element_by_css_selector('link[rel="password-manifest"]')
+            elt = self.driver.find_element_by_css_selector('link[rel="password-manifest"]')
             resp = requests.get(elt.get_attribute('href'), verify=not self.ignore_ssl_errors)
             return self.load_data_from_content(resp.content)
         except NoSuchElementException:
@@ -151,11 +134,14 @@ class Passwd(object):
 
     def test_success(self, container):
         if 'landing' in container['success']:
-            if container['success']['landing'] == self.driver.current_url:
+            landing = container['success']['landing']
+            if not isinstance(landing, list):
+                landing = [landing]
+            if self.driver.current_url in landing:
                 return True
             else:
                 self.logger.debug("Testing success (landing). Seeking {} ; got {}".format(
-                  container['success']['landing'], self.driver.current_url
+                  landing, self.driver.current_url
                 ))
                 if self.debug:
                     self.write_screenshot()
@@ -291,10 +277,9 @@ def main():
     parser.add_argument("--oldpass", help="Old Password (avoids prompt)")
     parser.add_argument("--newpass", help="New Password (avoids prompt)")
     parser.add_argument("--ignore-ssl-errors", help="Ignore SSL certificate errors", action="store_true")
-    parser.add_argument("--phantom", help="PhantomJS arguments (use this last; it gobbles up the remainder)", nargs=REMAINDER)
     args = parser.parse_args()
 
-    with Passwd(args.domain, debug=args.debug, service_args=args.phantom, ignore_ssl_errors=args.ignore_ssl_errors) as passwd:
+    with Passwd(args.domain, debug=args.debug, ignore_ssl_errors=args.ignore_ssl_errors) as passwd:
         if args.username:
             username = args.username
             print "Using provided username"
