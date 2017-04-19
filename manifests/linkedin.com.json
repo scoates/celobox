@@ -9,7 +9,7 @@
         "password": "#session_password-login",
         "submit": "#btn-primary",
         "success": {
-            "landing": "https://www.linkedin.com/feed/"
+            "landing": ["https://www.linkedin.com/feed/", "https://www.linkedin.com/feed/?trk=", "https://www.linkedin.com/nhome/"]
         }
     },
     "password": {
